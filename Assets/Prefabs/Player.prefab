@@ -187,7 +187,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7475411125262843608}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 1.6
   m_LinearDamping: 6
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -219,13 +219,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 7
+  walkSpeed: 7
+  sprintSpeed: 12
   groundDrag: 5
-  jumpForce: 12
+  jumpForce: 10
   jumpCooldown: 0.25
   airMultiplier: 0.4
+  crouchSpeed: 3
+  crouchYScale: 0.5
   jumpKey: 32
+  sprintKey: 304
+  crouchKey: 306
   playerHeight: 2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 64
+  maxSlopeAngle: 40
   orientation: {fileID: 8124083889511643330}
+  state: 0

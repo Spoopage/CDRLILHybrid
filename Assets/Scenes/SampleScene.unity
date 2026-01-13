@@ -731,8 +731,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1123604985979620615, guid: 4ca8ff99e64c2804f8f82af3d03b6381, type: 3}
+      propertyPath: m_Mass
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1123604985979620615, guid: 4ca8ff99e64c2804f8f82af3d03b6381, type: 3}
       propertyPath: m_LinearDamping
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4806693295068116140, guid: 4ca8ff99e64c2804f8f82af3d03b6381, type: 3}
+      propertyPath: jumpForce
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7475411125262843608, guid: 4ca8ff99e64c2804f8f82af3d03b6381, type: 3}
       propertyPath: m_Name

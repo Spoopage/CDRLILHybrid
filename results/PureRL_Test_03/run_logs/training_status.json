@@ -1,0 +1,65 @@
+{
+    "RLAgent": {
+        "checkpoints": [
+            {
+                "steps": 347200,
+                "file_path": "results\\PureRL_Test_03\\RLAgent\\RLAgent-347200.onnx",
+                "reward": null,
+                "creation_time": 1777145720.6154332,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_03\\RLAgent\\RLAgent-347200.pt"
+                ]
+            },
+            {
+                "steps": 399988,
+                "file_path": "results\\PureRL_Test_03\\RLAgent\\RLAgent-399988.onnx",
+                "reward": 214.80000698566437,
+                "creation_time": 1777146615.1564765,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_03\\RLAgent\\RLAgent-399988.pt"
+                ]
+            },
+            {
+                "steps": 410890,
+                "file_path": "results\\PureRL_Test_03\\RLAgent\\RLAgent-410890.onnx",
+                "reward": 82.50000113248825,
+                "creation_time": 1777146902.8936956,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_03\\RLAgent\\RLAgent-410890.pt"
+                ]
+            },
+            {
+                "steps": 499983,
+                "file_path": "results\\PureRL_Test_03\\RLAgent\\RLAgent-499983.onnx",
+                "reward": null,
+                "creation_time": 1777150126.7577608,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_03\\RLAgent\\RLAgent-499983.pt"
+                ]
+            },
+            {
+                "steps": 581313,
+                "file_path": "results\\PureRL_Test_03\\RLAgent\\RLAgent-581313.onnx",
+                "reward": null,
+                "creation_time": 1777151360.8132675,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_03\\RLAgent\\RLAgent-581313.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 581313,
+            "file_path": "results\\PureRL_Test_03\\RLAgent.onnx",
+            "reward": null,
+            "creation_time": 1777151360.8132675,
+            "auxillary_file_paths": [
+                "results\\PureRL_Test_03\\RLAgent\\RLAgent-581313.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.11.0+cu115"
+    }
+}

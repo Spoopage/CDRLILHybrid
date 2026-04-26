@@ -1,0 +1,47 @@
+{
+    "RLAgent": {
+        "checkpoints": [
+            {
+                "steps": 251343,
+                "file_path": "results\\PureRL_Test_02\\RLAgent\\RLAgent-251343.onnx",
+                "reward": 251.7000090678533,
+                "creation_time": 1776920768.597559,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_02\\RLAgent\\RLAgent-251343.pt"
+                ]
+            },
+            {
+                "steps": 323343,
+                "file_path": "results\\PureRL_Test_02\\RLAgent\\RLAgent-323343.onnx",
+                "reward": 262.00000500679016,
+                "creation_time": 1776935213.6766021,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_02\\RLAgent\\RLAgent-323343.pt"
+                ]
+            },
+            {
+                "steps": 377599,
+                "file_path": "results\\PureRL_Test_02\\RLAgent\\RLAgent-377599.onnx",
+                "reward": 223.65000702813268,
+                "creation_time": 1776936159.6675277,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_02\\RLAgent\\RLAgent-377599.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 377599,
+            "file_path": "results\\PureRL_Test_02\\RLAgent.onnx",
+            "reward": 223.65000702813268,
+            "creation_time": 1776936159.6675277,
+            "auxillary_file_paths": [
+                "results\\PureRL_Test_02\\RLAgent\\RLAgent-377599.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.11.0+cu115"
+    }
+}

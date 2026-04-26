@@ -1,0 +1,38 @@
+{
+    "RLAgent": {
+        "checkpoints": [
+            {
+                "steps": 499984,
+                "file_path": "results\\PureRL_Test_01\\RLAgent\\RLAgent-499984.onnx",
+                "reward": 176.9666729370753,
+                "creation_time": 1776905386.1051843,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_01\\RLAgent\\RLAgent-499984.pt"
+                ]
+            },
+            {
+                "steps": 500064,
+                "file_path": "results\\PureRL_Test_01\\RLAgent\\RLAgent-500064.onnx",
+                "reward": 177.75000682473183,
+                "creation_time": 1776905387.124029,
+                "auxillary_file_paths": [
+                    "results\\PureRL_Test_01\\RLAgent\\RLAgent-500064.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 500064,
+            "file_path": "results\\PureRL_Test_01\\RLAgent.onnx",
+            "reward": 177.75000682473183,
+            "creation_time": 1776905387.124029,
+            "auxillary_file_paths": [
+                "results\\PureRL_Test_01\\RLAgent\\RLAgent-500064.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.11.0+cu115"
+    }
+}

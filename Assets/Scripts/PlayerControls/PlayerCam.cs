@@ -1,3 +1,4 @@
+using Unity.MLAgents;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,6 +22,21 @@ public class PlayerCam : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Academy.Instance.IsCommunicatorOn)
+        {
+            // Bebaskan mouse agar bisa dipakai buka aplikasi lain saat training
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            return;
+        }
+
+        // Kembalikan cursor ke mode terkunci jika kita sedang tes manual
+        if (Cursor.lockState != CursorLockMode.Locked)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
         // Get mouse input  
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
 

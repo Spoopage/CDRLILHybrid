@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Unity.MLAgents;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -71,9 +72,19 @@ public class PlayerMovement : MonoBehaviour
         // Ground Check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
-        MyInput();
-        SpeedControl();
-        StateHandler();
+        // Jika sedang training, JANGAN baca input manusia
+        if (Academy.Instance.IsCommunicatorOn)
+        {
+            horizontalInput = 0;
+            verticalInput = 0;
+        }
+        else
+        {
+            // Mode Normal / Heuristic: Baca input manusia
+            MyInput();
+            SpeedControl();
+            StateHandler();
+        }
 
         // Handle Drag
         if (grounded)
@@ -90,7 +101,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        MovePlayer();
+        // Jika sedang tidak training 
+        if (!Academy.Instance.IsCommunicatorOn)
+        {
+            MovePlayer();
+        }
     }
     void MyInput()
     {

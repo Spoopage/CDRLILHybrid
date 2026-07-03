@@ -96,9 +96,27 @@ InitTestScene*.unity*
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
 
 # Auto-generated scenes by play mode tests
-/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*.plastic/ 
-venv/ 
-venv~/ 
-Library/ 
-Temp/ 
-/[Vv]env/
+/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*.plastic/
+venv/
+venv~/
+Library/
+Temp/
+
+# Data outputs (bug reports, coverage, position/inference logs) - kept on Google Drive, not in git
+/[Aa]ssets/BugReport*.csv
+/[Aa]ssets/BugReport*.csv.meta
+/[Aa]ssets/CoverageData*.csv
+/[Aa]ssets/CoverageData*.csv.meta
+/[Aa]ssets/InferenceLog*.csv
+/[Aa]ssets/InferenceLog*.csv.meta
+/[Aa]ssets/PositionLog*.csv
+/[Aa]ssets/PositionLog*.csv.meta
+
+# ML-Agents training run outputs (tensorboard logs etc.) - kept on Google Drive, not in git
+/results/
+
+# Unity crash recovery scenes
+/[Aa]ssets/_Recovery/
+
+# Local Claude Code project instructions
+/CLAUDE.md

@@ -4,6 +4,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
+using System.IO;
 
 public class RLAgent : Agent
 {
@@ -24,26 +25,41 @@ public class RLAgent : Agent
     public LayerMask whatIsGround;
     private bool grounded;
 
-    [Header("Stuck Detection")]
-    public float stuckTimeout = 5f; // Berapa detik agen boleh diam/nyangkut
-    private float stuckTimer = 0f;
-    private Vector3 lastPosition;
-
     [Header("Coverage & Reward System")]
     public float gridCellSize = 1f;
     public float rewardPerNewCell = 0.1f;
     // Area yang sudah dikunjungi dalam episode ini
     private HashSet<Vector2Int> visitedGrids = new HashSet<Vector2Int>();
 
+    [Header("Action Tracking")]
+    private int jumpCount = 0;
+    private int sprintCount = 0;
+    private int totalActions = 0;
+
+    [Header("Bug Reporting")]
+    public string fileName = "BugReport.csv";
+
+    [Header("Stuck Detection")]
+    public float stuckTimeout = 5f; // Berapa detik agen boleh diam/nyangkut
+    private float stuckTimer = 0f;
+    private Vector3 lastPosition;
+
+    [Header("Golden Path Settings")]
+    public List<Transform> goldenPathWaypoints; // Masukkan list titik jalan di Inspector
+    public float maxDeviationDistance = 10f; // Jarak maksimal sebelum dianggap Keluar Jalur
+
     private Rigidbody rb;
     private Vector3 moveDir;
     private float currentSpeed;
     public Transform target;
+    [System.NonSerialized]
     public static int totalFalls = 0;
     private int episodeCount = 0;
+    private LayerMask obstacleLayer;
+    private LayerMask buildingLayer;
 
     [Header("Spawn Settings")]
-    public Transform spawnPoint; // Tarik objek SpawnPoint ke sini di Inspector
+    public Transform spawnPoint;
 
     public override void Initialize()
     {
@@ -52,18 +68,40 @@ public class RLAgent : Agent
 
         if (spawnPoint == null)
             spawnPoint = GameObject.Find("SpawnPoint")?.transform;
+        
+        #if UNITY_EDITOR
+        // Reset static counters in editor when not doing domain reload
+        if (!UnityEditor.EditorApplication.isPlaying)
+            totalFalls = 0;
+        #endif
     }
 
     public override void OnEpisodeBegin()
     {
+        // Memory management: Bersihkan memori yang tidak terpakai setiap episode untuk mencegah penumpukan data
         Resources.UnloadUnusedAssets();
         System.GC.Collect();
         episodeCount++;
 
+        if (totalActions > 0)
+        {
+            // Menghitung rasio/persentase penggunaan aksi
+            float jumpRatio = (float)jumpCount / totalActions;
+            float sprintRatio = (float)sprintCount / totalActions;
+
+            Academy.Instance.StatsRecorder.Add("Actions/JumpUsage", jumpRatio);
+            Academy.Instance.StatsRecorder.Add("Actions/SprintUsage", sprintRatio);
+        }
+
+        // Reset counter untuk episode baru
+        jumpCount = 0;
+        sprintCount = 0;
+        totalActions = 0;
+
         if (episodeCount % 10 == 0 && visitedGrids.Count > 0)
-    {
-        Academy.Instance.StatsRecorder.Add("Custom/CoverageCount", visitedGrids.Count);
-    }
+        {
+            Academy.Instance.StatsRecorder.Add("Custom/CoverageCount", visitedGrids.Count);
+        }
 
         // Reset Posisi dan Physics
         if (spawnPoint != null)
@@ -90,44 +128,48 @@ public class RLAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // RayPerceptionSensor3D sudah memberikan observasi ruang secara otomatis.
-        // Di sini kita hanya perlu menambahkan observasi status tubuh agen.
-
-        // 1. Posisi Lokal Agen (3 data: x, y, z)
-        // Agar agen tahu dia sudah di area mana (relatif terhadap titik pusat map)
+        // Posisi Lokal Agen (3 data: x, y, z)
+        // Agar agen tahu dia sudah di area mana
         sensor.AddObservation(transform.localPosition);
 
-        // 2. Arah Hadap Agen (3 data: Forward Vector)
+        // Arah Hadap Agen (3 data: Forward Vector)
         // Penting agar agen tahu orientasi tubuhnya terhadap ruang
         sensor.AddObservation(transform.forward);
 
-        // 3. Kecepatan Linear Lengkap (3 data: Vector3, bukan cuma magnitude)
-        // Mengetahui arah gerak saat ini membantu agen menyadari kalau dia cuma mutar-mutar
+        // Kecepatan Linear Lengkap (3 data: Vector3, bukan cuma magnitude)
+        // Mengetahui arah gerak saat ini membantu agen menyadari kalau dia cuma berputar-putar
         sensor.AddObservation(rb.linearVelocity);
 
-        // 4. Kecepatan Sudut (1 data: Angular Velocity di sumbu Y)
+        // Kecepatan Sudut (1 data: Angular Velocity di sumbu Y)
         // Membantu agen menyadari kalau dia sedang berputar (spinning)
         sensor.AddObservation(rb.angularVelocity.y);
 
-        // 5. Status Grounded (1 data)
+        // Status Grounded (1 data)
         sensor.AddObservation(grounded ? 1.0f : 0.0f);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // 1. Discrete Actions
+        totalActions++;
+        // Cek Sprint
+        if (actions.DiscreteActions[2] == 1) sprintCount++;
+
+        // Cek Jump
+        if (actions.DiscreteActions[3] == 1 && grounded) jumpCount++;
+
+        // Discrete Actions
         int moveZ = actions.DiscreteActions[0];   // 0: Diam, 1: Maju, 2: Mundur
         int rotateY = actions.DiscreteActions[1]; // 0: Diam, 1: Kanan, 2: Kiri
         int isSprinting = actions.DiscreteActions[2]; // 0: Jalan, 1: Sprint
         int isJumping = actions.DiscreteActions[3];   // 0: Tidak, 1: Lompat
 
-        // 2. Logic Rotasi
+        // Logic Rotasi
         float rotationInput = 0f;
         if (rotateY == 1) rotationInput = 1f;
         if (rotateY == 2) rotationInput = -1f;
         transform.Rotate(Vector3.up, rotationInput * rotationSpeed * Time.fixedDeltaTime);
 
-        // 3. Logic Movement & Sprint
+        // Logic Movement & Sprint
         float moveInput = 0f;
         if (moveZ == 1) moveInput = 1f;
         if (moveZ == 2) moveInput = -1f;
@@ -145,7 +187,7 @@ public class RLAgent : Agent
         else
             rb.AddForce(moveDir.normalized * currentSpeed * 10f * airMultiplier, ForceMode.Force);
 
-        // 4. Logic Jumping
+        // Logic Jumping
         if (isJumping == 1 && readyToJump && grounded)
         {
             readyToJump = false;
@@ -154,8 +196,11 @@ public class RLAgent : Agent
             Invoke(nameof(ResetJump), jumpCooldown);
         }
 
-        // 5. Reward System (Eksplorasi Coverage)
+        // Reward System (Eksplorasi Coverage)
         TrackCoverageAndReward();
+
+        //DetectPhysicsBugs();
+        //CheckGoldenPathDeviation();
 
         // Stuck Detection
         if (Vector3.Distance(transform.position, lastPosition) < 0.5f)
@@ -172,6 +217,7 @@ public class RLAgent : Agent
         // Jika timer melebihi batas, berikan hukuman dan reset
         if (stuckTimer > stuckTimeout)
         {
+            //ReportBug("StuckInGeometry"); // Log bug stuck
             AddReward(-0.5f); // Berikan penalti karena membuang-buang waktu
             EndEpisode();     // Paksa mulai ulang episode
         }
@@ -194,6 +240,41 @@ public class RLAgent : Agent
             AddReward(rewardPerNewCell);
         }
     }
+
+    private void DetectPhysicsBugs()
+    {
+        // Deteksi Clipping (Overlap dengan Building)
+        Collider[] overlap = Physics.OverlapSphere(transform.position, 0.3f, buildingLayer);
+        if (overlap.Length > 0)
+        {
+            ReportBug("Physics_ClippingDetected");
+        }
+
+        // Deteksi Kecepatan Abnormal (Velocity Explosion)
+        if (rb.linearVelocity.magnitude > sprintSpeed * 10f)
+        {
+            ReportBug("Physics_VelocityExplosion");
+        }
+    }
+
+    private void CheckGoldenPathDeviation()
+    {
+        if (goldenPathWaypoints == null || goldenPathWaypoints.Count == 0) return;
+
+        float minDistance = float.MaxValue;
+        foreach (Transform point in goldenPathWaypoints)
+        {
+            float dist = Vector3.Distance(transform.position, point.position);
+            if (dist < minDistance) minDistance = dist;
+        }
+
+        if (minDistance > maxDeviationDistance)
+        {
+            // Jangan langsung EndEpisode, cukup lapor sebagai observasi
+            ReportBug("Navigation_GoldenPathDeviation");
+        }
+    }
+
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
@@ -218,9 +299,42 @@ public class RLAgent : Agent
         discreteActions[3] = Input.GetKey(KeyCode.Space) ? 1 : 0;
     }
 
+    // Bug reporting system: Mencatat jenis bug, posisi, dan waktu ke file CSV
+    private void ReportBug(string bugType)
+    {
+        try
+        {
+            Vector3 bugPos = transform.position;
+            string timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string csvRow = $"{timestamp},{bugType},{bugPos.x:F2},{bugPos.y:F2},{bugPos.z:F2},{CompletedEpisodes}";
+
+            string path = Path.Combine(Application.dataPath, fileName);
+
+            // Jika file tidak ada, buat header-nya
+            if (!File.Exists(path))
+            {
+                File.WriteAllText(path, "Timestamp,BugType,PosX,PosY,PosZ,Episode\n");
+            }
+
+            // Gunakan FileStream dengan FileShare agar lebih toleran terhadap akses bersamaan
+            using (StreamWriter sw = new StreamWriter(new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)))
+            {
+                sw.WriteLine(csvRow);
+            }
+
+            Debug.LogWarning($"<color=red>BUG DETECTED:</color> {bugType} at {bugPos}");
+        }
+        catch (IOException e)
+        {
+            // Jika file terkunci, kita log ke console saja agar training tidak stop
+            Debug.LogWarning("Gagal menulis ke CSV karena file sedang digunakan: " + e.Message);
+        }
+    }
+
+    // Agar agen tidak sering menabrak perimeter
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Obstacle") || collision.gameObject.layer == LayerMask.NameToLayer("Perimeter"))
+        if (/*collision.gameObject.CompareTag("Obstacle") ||*/ collision.gameObject.layer == LayerMask.NameToLayer("Perimeter"))
         {
             AddReward(-0.01f); // Penalti kecil agar agen tidak sering menabrak
         }
@@ -231,13 +345,15 @@ public class RLAgent : Agent
         readyToJump = true;
     }
 
-    // Fungsi deteksi anomali (Geometry Bug Y < -10)
+    // Fungsi deteksi fall bug
     private void Update()
     {
         if (transform.position.y < -10f)
         {
             totalFalls++;
-            Academy.Instance.StatsRecorder.Add("Custom/TotalFalls", totalFalls);
+
+            // Log posisi terakhir
+            ReportBug("FallThroughFloor");
 
             // Beri penalti besar jika jatuh ke luar map, lalu akhiri episode
             SetReward(-1f);

@@ -8,7 +8,7 @@ Proyek skripsi yang membandingkan tiga arsitektur Unity ML-Agents untuk deteksi 
 - **Pure Curiosity-Driven Reinforcement Learning (CDRL)**
 - **Hybrid IL + CDRL**
 
-Ketiga agen dilatih di **Map A** (urban) dan diuji generalisasinya di **Map B** (forest, ~80x80 unit, 1161 grid NavMesh valid) tanpa retraining.
+Ketiga agen dilatih di **Map A** (urban) dan diuji generalisasinya di **Map B** (forest) tanpa retraining.
 
 ## Daftar Isi
 
